@@ -21,11 +21,12 @@
 # Modifying these default path settings can be done in different ways.
 # To learn more about startup files, refer to your shell's man page.
 
-MSYS2_PATH="/usr/local/bin:/usr/bin:/bin"
+POSIX_PATH="/usr/local/bin:/usr/bin"
+NATIVE_PATH="/bin"
 MANPATH='/usr/local/man:/usr/share/man:/usr/man:/share/man'
 INFOPATH='/usr/local/info:/usr/share/info:/usr/info:/share/info'
 
-case "${MSYS2_PATH_TYPE:-minimal}" in
+case "${PATH_TYPE:-inherit}" in
   strict)
     # Do not inherit any path configuration, and allow for full customization
     # of external path. This is supposed to be used in special cases such as
@@ -40,25 +41,17 @@ case "${MSYS2_PATH_TYPE:-minimal}" in
   *)
     # Do not inherit any path configuration but configure a default Windows path
     # suitable for normal usage with minimal external interference.
-    WIN_ROOT="$(PATH=${MSYS2_PATH} exec cygpath -Wu)"
+    WIN_ROOT="$(PATH=${POSIX_PATH} exec cygpath -Wu)"
     ORIGINAL_PATH="${WIN_ROOT}/System32:${WIN_ROOT}:${WIN_ROOT}/System32/Wbem:${WIN_ROOT}/System32/WindowsPowerShell/v1.0/"
 esac
 
-unset MINGW_MOUNT_POINT
-. '/etc/msystem'
-case "${MSYSTEM}" in
-MINGW*|CLANG*|UCRT*)
-  MINGW_MOUNT_POINT="${MINGW_PREFIX}"
-  PATH="${MINGW_MOUNT_POINT}/bin:${MSYS2_PATH}${ORIGINAL_PATH:+:${ORIGINAL_PATH}}"
-  PKG_CONFIG_PATH="${MINGW_MOUNT_POINT}/lib/pkgconfig:${MINGW_MOUNT_POINT}/share/pkgconfig"
-  ACLOCAL_PATH="${MINGW_MOUNT_POINT}/share/aclocal:/usr/share/aclocal"
-  MANPATH="${MINGW_MOUNT_POINT}/local/man:${MINGW_MOUNT_POINT}/share/man:${MANPATH}"
-  ;;
-*)
-  PATH="${MSYS2_PATH}:/opt/bin${ORIGINAL_PATH:+:${ORIGINAL_PATH}}"
-  PKG_CONFIG_PATH="/usr/lib/pkgconfig:/usr/share/pkgconfig:/lib/pkgconfig"
-esac
-
+CARCH='x86_64'
+CHOST='x86_64-w64-mingw32'
+PREFIX='/'
+PATH="${NATIVE_PATH}:${POSIX_PATH}${ORIGINAL_PATH:+:${ORIGINAL_PATH}}"
+PKG_CONFIG_PATH="/lib/pkgconfig:/share/pkgconfig"
+ACLOCAL_PATH="/share/aclocal:/usr/share/aclocal"
+MANPATH="/share/man:${MANPATH}"
 CONFIG_SITE="/etc/config.site"
 
 MAYBE_FIRST_START=false
@@ -119,22 +112,23 @@ for postinst in $(export LC_COLLATE=C; echo /etc/post-install/*.post); do
   [ -e "${postinst}" ] && . "${postinst}"
 done
 
-if [ ! "x${BASH_VERSION}" = "x" ]; then
+if [ ! "${BASH_VERSION}" = "" ]; then
   HOSTNAME="$(exec /usr/bin/hostname)"
-  SHELL=`which bash`
+  SHELL=$(which bash)
   profile_d sh
   [ -f "/etc/bash.bashrc" ] && . "/etc/bash.bashrc"
-elif [ ! "x${KSH_VERSION}" = "x" ]; then
-  typeset -l HOSTNAME="$(exec /usr/bin/hostname)"
+elif [ ! "${KSH_VERSION}" = "" ]; then
+  typeset -l HOSTNAME
+  HOSTNAME="$(exec /usr/bin/hostname)"
   profile_d sh
   PS1=$(print '\033]0;${PWD}\n\033[32m${USER}@${HOSTNAME} \033[33m${PWD/${HOME}/~}\033[0m\n$ ')
-elif [ ! "x${ZSH_VERSION}" = "x" ]; then
+elif [ ! "${ZSH_VERSION}" = "" ]; then
   HOSTNAME="$(exec /usr/bin/hostname)"
   profile_d sh
   profile_d zsh
   PS1='(%n@%m)[%h] %~ %% '
-  SHELL=`which zsh`
-elif [ ! "x${POSH_VERSION}" = "x" ]; then
+  SHELL=$(which zsh)
+elif [ ! "${POSH_VERSION}" = "" ]; then
   HOSTNAME="$(exec /usr/bin/hostname)"
   PS1="$ "
 else 
@@ -148,6 +142,7 @@ then
   export ACLOCAL_PATH
 fi
 
+PATH="${NATIVE_PATH}:${POSIX_PATH}${ORIGINAL_PATH:+:${ORIGINAL_PATH}}"
 export PATH MANPATH INFOPATH PKG_CONFIG_PATH USER TMP TEMP PRINTER HOSTNAME PS1 SHELL tmp temp ORIGINAL_TMP ORIGINAL_TEMP ORIGINAL_PATH CONFIG_SITE
 unset PATH_SEPARATOR
 
