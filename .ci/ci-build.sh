@@ -10,7 +10,7 @@ DIR="$( cd "$( dirname "$0" )" && pwd )"
 
 # Configure
 source "$DIR/ci-library.sh"
-mkdir artifacts
+mkdir artifacts poix-artifacts
 git_config user.email 'ci@msys2.org'
 git_config user.name  'MSYS2 Continuous Integration'
 git remote add upstream 'https://github.com/MSYS2/MSYS2-packages'
@@ -43,6 +43,7 @@ for package in "${packages[@]}"; do
     execute 'Installing the toolchain' pacman -S --needed --noconfirm --noprogressbar base-devel
     execute 'Building binary' makepkg --noconfirm --noprogressbar --nocheck --syncdeps --rmdeps --cleanbuild
     execute 'Building source' makepkg --noconfirm --noprogressbar --allsource
+    execute 'Skipping posix packages'  mv "${package}"/posix-*.pkg.tar.* poix-artifacts
     echo "::endgroup::"
 
     if [ -f $package/.ci-sequential ]; then
