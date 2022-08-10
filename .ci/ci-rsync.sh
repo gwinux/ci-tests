@@ -2,7 +2,7 @@
 
 pacman -S --needed --noconfirm --noprogressbar openssh rsync
 source <(ssh-agent)
-ssh-add <(echo -e ${SSH_KEY})
+ssh-add <(cat <<<${SSH_KEY})
 
 pushd msys2-artifacts
 echo "::group::[rsync] msys2-artifacts"

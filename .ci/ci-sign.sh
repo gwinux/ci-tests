@@ -3,23 +3,18 @@
 set -eo pipefail
 
 DIR="$( cd "$( dirname "$0" )" && pwd )"
+source "$DIR/ci-library.sh"
 
-import_key() {
-    [[ -d ~/.gnupg ]] && return
-
-    gpg --import <(echo -e ${GPG_KEY})
-}
-
-sign_pkgs() {
-    for pkg in ${1[@]}; do
-        gpg --detach-sign --no-armor "$1"
-    done
-}
-
-import_key
+gpg --import <(cat <<<${GPG_KEY}) || failure "Cannot import gpg secret key"
 
 for d in msys2-artifacts posix-artifacts; do
     echo "::group::[sign] $d"
-    sign_pkgs ${d}/*.{pkg,src}.tar.*
+    for pkg in ${d}/*.{pkg,src}.tar.*; do
+        [[ ! -e ${pkg} ]] && continue
+        basename ${pkg}
+        gpg --detach-sign --no-armor ${pkg}
+    done
     echo "::endgroup::"
 done
+
+success "All packages are signed"
