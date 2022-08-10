@@ -10,7 +10,7 @@ DIR="$( cd "$( dirname "$0" )" && pwd )"
 
 # Configure
 source "$DIR/ci-library.sh"
-mkdir artifacts poix-artifacts
+mkdir msys2-artifacts posix-artifacts
 git_config user.email 'ci@msys2.org'
 git_config user.name  'MSYS2 Continuous Integration'
 git remote add upstream 'https://github.com/MSYS2/MSYS2-packages'
@@ -31,8 +31,8 @@ message 'Building packages' "${packages[@]}"
 execute 'Approving recipe quality' check_recipe_quality
 
 message 'Adding an empty local repository'
-repo-add $PWD/artifacts/ci.db.tar.gz
-sed -i '1s|^|[ci]\nServer = file://'"$PWD"'/artifacts/\nSigLevel = Never\n|' /etc/pacman.conf
+repo-add $PWD/msys2-artifacts/ci.db.tar.gz
+sed -i '1s|^|[ci]\nServer = file://'"$PWD"'/msys2-artifacts/\nSigLevel = Never\n|' /etc/pacman.conf
 pacman -Sy
 
 message 'Building packages'
@@ -43,8 +43,25 @@ for package in "${packages[@]}"; do
     execute 'Installing the toolchain' pacman -S --needed --noconfirm --noprogressbar base-devel
     execute 'Building binary' makepkg --noconfirm --noprogressbar --nocheck --syncdeps --rmdeps --cleanbuild
     execute 'Building source' makepkg --noconfirm --noprogressbar --allsource
-    execute 'Skipping posix packages'  mv "${package}"/posix-*.pkg.tar.* poix-artifacts
+    message "Skipping posix package: ${package}"
+    
+    msys2_pkg=()
+    for pkg in "${package}"/*.pkg.tar.*; do 
+        if [[ ${pkg} =~ "${package}"/posix* ]]; then
+            mv ${pkg} posix-artifacts
+        else
+            msys2_pkg+=(${pkg})
+        fi
+    done
+
+    if [ ${#msys2_pkg[@]} -eq 0 ]; then
+        unset package msys2_pkg
+        continue
+    fi 
+
     echo "::endgroup::"
+
+    if compgen -G "${package}/*.pkg.tar.*" > /dev/null; then continue; fi
 
     if [ -f $package/.ci-sequential ]; then
         cd "$package"
@@ -64,7 +81,7 @@ for package in "${packages[@]}"; do
 
             echo "::group::[uninstall] ${pkgname}"
             message "Uninstalling $pkgname"
-            repo-add $PWD/../artifacts/ci.db.tar.gz $PWD/$pkg
+            repo-add $PWD/../msys2-artifacts/ci.db.tar.gz $PWD/$pkg
             pacman -Sy
             pacman -R --recursive --unneeded --noconfirm --noprogressbar "$pkgname"
             echo "::endgroup::"
@@ -94,7 +111,7 @@ for package in "${packages[@]}"; do
         echo "::endgroup::"
 
         echo "::group::[uninstall] ${package}"
-        repo-add $PWD/artifacts/ci.db.tar.gz "${package}"/*.pkg.tar.*
+        repo-add $PWD/msys2-artifacts/ci.db.tar.gz "${package}"/*.pkg.tar.*
         pacman -Sy
         message "Uninstalling $package"
         cd "$package"
@@ -108,11 +125,11 @@ for package in "${packages[@]}"; do
         echo "::endgroup::"
     fi
 
-    mv "${package}"/*.pkg.tar.* artifacts
-    mv "${package}"/*.src.tar.* artifacts
+    mv "${package}"/*.pkg.tar.* msys2-artifacts
+    mv "${package}"/*.src.tar.* msys2-artifacts
     unset package
 done
 success 'All packages built successfully'
 
-cd artifacts
+cd msys2-artifacts
 execute 'SHA-256 checksums' sha256sum *

@@ -65,16 +65,16 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: msys2-packages
-          path: C:/_/artifacts/*.pkg.tar.*
+          path: C:/_/msys2-artifacts/*.pkg.tar.*
 
       - name: "Upload sources"
         uses: actions/upload-artifact@v3
         with:
           name: sources
-          path: C:/_/artifacts/*.src.tar.*
+          path: C:/_/msys2-artifacts/*.src.tar.*
 
       - name: "Upload posix binaries"
         uses: actions/upload-artifact@v3
         with:
           name: posix-packages
-          path: C:/_/artifacts/*.pkg.tar.*
+          path: C:/_/posix-artifacts/*.pkg.tar.*
