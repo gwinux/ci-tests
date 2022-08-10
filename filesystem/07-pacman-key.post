@@ -4,8 +4,8 @@ maybe_init_keyring ()
   then
     export GNUPGHOME="$(pacman-conf.exe gpgdir)"
     /usr/bin/pacman-key --init
-    /usr/bin/pacman-key --populate msys2 || true
-    /usr/bin/pacman-key --refresh-keys || true
+    /usr/bin/pacman-key --recv-keys 818AADAF9A7C5DB3C0B81B78BD8A71F68D0BE18F 
+    /usr/bin/pacman-key --lsign 818AADAF9A7C5DB3C0B81B78BD8A71F68D0BE18F 
     /usr/bin/gpgconf --kill all
     
     MAYBE_FIRST_START=true
