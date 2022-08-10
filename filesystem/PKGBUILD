@@ -1,0 +1,174 @@
+# Maintainer: Alexey Pavlov <alexpux@gmail.com>
+# Contributor: Renato Silva <br.renatosilva@gmail.com>
+# Contributor: Karlson2k (Evgeny Grin) <k2k@narod.ru>
+# Contributor: Alethea Rose <alethea@alethearose.com>
+
+pkgname=filesystem
+pkgver=2022.01
+pkgrel=5
+pkgdesc='Base filesystem'
+arch=('i686' 'x86_64')
+license=('BSD')
+url='https://sourceforge.net/projects/msys2/'
+provides=('msys2-base')
+replaces=('msys2-base')
+backup=('etc/fstab' 'etc/shells' 'etc/profile'
+        etc/bash.bash{rc,_logout} etc/skel/.bash{rc,_profile,_logout}
+        etc/nsswitch.conf)
+source=('bash.bash_logout'
+        'bash.bashrc'
+        'cmd'
+        'dep-search'
+        'dot.bash_logout'
+        'dot.bash_profile'
+        'dot.bashrc'
+        'dot.inputrc'
+        'dot.profile'
+        'fstab'
+        'mingw32.ico'
+        'mingw64.ico'
+        'msys2.ico'
+        'ucrt64.ico'
+        'clang64.ico'
+        'clang32.ico'
+        'clangarm64.ico'
+        'msys2_shell.cmd'
+        'msystem'
+        'nsswitch.conf'
+        'profile'
+        'profile.lang.sh'
+        'profile.tzset.sh'
+        'profile.000-msys2.sh'
+        'shell'
+        'shells'
+        'start'
+        '01-devices.post'
+        '03-mtab.post'
+        '05-home-dir.post'
+        '06-windows-files.post'
+        '07-pacman-key.post'
+        '08-xml-catalog.post'
+        'cygwin.ldif'
+        'main-config.site'
+        'redirect-config.site'
+        'os-release')
+sha256sums=('742a7d66b7a5ebd2b8461728c5b44a46b2305fd2116208eecae5f45828938ea0'
+            '36d4affa25606c87e70c42a5fe2294aa7898fb54f93a27910fb55224f4d6588a'
+            '99eae6e37081edd73b399009c85f4a67a0c14481241ee4937ab45c4178b540fb'
+            '69e62980bd853bc67194c3cd0b3547b35ab5b2fc7237d70f15617196685bf287'
+            '4330edf340394d0dae50afb04ac2a621f106fe67fb634ec81c4bfb98be2a1eb5'
+            '6dbc86dd88d0dfbe69271e3f49095135fde755ac6e454bc6a984ec081a1e2258'
+            '602d7075b29cf5ed00de83fe010fcae4f0ad7c3321f5a2563a096b2eaf027c06'
+            'f327a822ef33e5d39e94af0419a9083a3e2cbb0d8bff4070453403f68bb6351b'
+            '5a51474700064f5c4527e4423a866ac957332f7e932675ab5fa6a419b47b1834'
+            '387ca1e86c1a18a143eb077ca194ad44c0a2faf98795a0d437f2d210d5a6df18'
+            'f8f1b5943d385e8a7e3b5a4a2c7d64004108c94c17b2f936016e2ae50bdb65af'
+            '91b4a790aad38a102565f0cfcba6c0e6d274f6cda0b37b128d9cc43c5ad6b24d'
+            '793b9450a1a59a6c294e51fd0c2a47090d68c68ff2f33a25a11b45f6408c3917'
+            '733e97cbb823773e1a08a91a41035a7692bc0ff270d3c894224911b4b091db44'
+            '56d4080c15dff89a6263f3d5f9aa68849b2062179cabd6d78edfe0e3af6bf64a'
+            '58f7431d7d8d9d09ebd3185c090404682d760bf18c27f94085007b037a5889bd'
+            '3b7af99516768485383b34d606749e6f98a250372a8191bc8d3a962d66bdfe35'
+            '22c0d481c7717eee7be0b29c69df15f65d39f16e4af50ad21919bd59259896d1'
+            'c54f238a7b33680d3f57db1cdf99504e551d4395e5503e84b36135d9a89b05ab'
+            '91f1f918cf13deab0124082086e990786113b0e710dbda4678d8fc14905ad94d'
+            '6446359419e13310d74ab54086271acc2f4ed0dfe97a474cdd06cd7c55ee59a4'
+            '6c0ca979c7b146b3750103b1296a399764f4e1b222ee091d3aa072b6da16c1a5'
+            'cbec90c9403826bf6d8dd1fed16240b9d8695ec15df5dcdab7e485bb46c016ab'
+            'd4dea6b907ff85dc55cc93d6089c3123af505e620311fc40b65d92bdb0fae65a'
+            'ad9873e18169ca87194af3413bdcbda536d9600b4f7d24fa9f7d59928309ff4a'
+            'f63241cc56aa7b7ec6962d19991d211b4e1641b78ba5226835118ab493830a8b'
+            'e96c1f54ffff792e738aa032815c82c30821b0683806e5ed0ba2a759db2fd494'
+            '42191d0e5a56c1da2adb6f665fceb82555de276f9a50af47ff9fa7b59b4d3848'
+            'd7b7eb4cd9e1f9bc227b009cdcacf700f5523ccc109fbd3c1c0331726d314c9e'
+            '9c126262051a047450ed97397ee89a7148098c03ae00a1cd67c3f3425d8e4b12'
+            'fedaf4d9ae282f6c1698d04d280dd48c8d3247321a5cb5e309e61e2c655102c6'
+            '574564607e5ea8d877f42d59c164801e3efa4393a0a74c0714d9b9a778dec43f'
+            'ad8533809ea2b1bce0a41b3a0a24dbc7a9f58b992ceb40cc9f862b1978032790'
+            'caf25e3390331c6a22cc91f1c1bc551a9f87c59171dd3ef7b3b6016859a10fb5'
+            '28c42ec8a6888e63b2156a802d93e74b544eff211ec688fb6ce8e67e12b81156'
+            '26bf8d1acade9431d60c035a7ddfa9cb0775d5b9a457c5aca56f51c5f2f93f98'
+            '1fef172ac99eef561100da9eecb7712786dff8dd73f4a97eb39462bde0275af8')
+
+build() {
+  cd ${srcdir}
+}
+
+package() {
+  cd ${pkgdir}
+
+  # setup root filesystem
+  #
+  for d in dev etc home usr var opt; do
+    install -d -m755 ${d}
+  done
+
+  mkdir -p tmp
+
+  # setup /etc
+  #
+  install -d etc/{fstab.d,skel,profile.d,post-install}
+  for f in bash.bashrc bash.bash_logout fstab shells profile nsswitch.conf msystem os-release; do
+    install -m644 ${srcdir}/${f} etc/
+  done
+
+  for f in ${srcdir}/*.post; do
+    install -m644 ${f} etc/post-install/
+  done
+
+  # user configuration file skeletons
+  #
+  install -m644 ${srcdir}/dot.bashrc etc/skel/.bashrc
+  install -m644 ${srcdir}/dot.inputrc etc/skel/.inputrc
+  install -m644 ${srcdir}/dot.bash_profile etc/skel/.bash_profile
+  install -m644 ${srcdir}/dot.bash_logout etc/skel/.bash_logout
+  install -m644 ${srcdir}/dot.profile etc/skel/.profile
+
+  install -m644 ${srcdir}/profile.tzset.sh etc/profile.d/tzset.sh
+  install -m644 ${srcdir}/profile.lang.sh etc/profile.d/lang.sh
+  install -m644 ${srcdir}/profile.000-msys2.sh etc/profile.d/000-msys2.sh
+
+  install -m644 ${srcdir}/mingw32.ico mingw32.ico
+  install -m644 ${srcdir}/mingw64.ico mingw64.ico
+  install -m644 ${srcdir}/ucrt64.ico ucrt64.ico
+  install -m644 ${srcdir}/clang64.ico clang64.ico
+  install -m644 ${srcdir}/clang32.ico clang32.ico
+  install -m644 ${srcdir}/clangarm64.ico clangarm64.ico
+  install -m644 ${srcdir}/msys2.ico msys2.ico
+  install -m755 ${srcdir}/msys2_shell.cmd msys2_shell.cmd
+
+  # setup /var
+  #
+  for d in cache/man local opt log/old lib/misc empty; do
+    install -d -m755 var/${d}
+  done
+  mkdir -p var/tmp
+
+  # setup /usr
+  #
+  for d in bin include lib share/misc src; do
+    install -d -m755 usr/${d}
+  done
+  for d in $(seq 8); do
+    install -d -m755 usr/share/man/man${d}
+  done
+  # various shell scripts
+  for f in cmd start dep-search shell; do
+    install -m755 ${srcdir}/${f} usr/bin
+  done
+
+  install -Dm 644 ${srcdir}/cygwin.ldif usr/share/Msys/cygwin.ldif
+
+  # setup 'configure' helpers
+  #
+  install -m644 ${srcdir}/main-config.site etc/config.site
+  install -D -m644 ${srcdir}/redirect-config.site usr/local/etc/config.site
+
+  # setup /mingw hierarchies
+  for m in mingw32 mingw64 clang32 clang64 clangarm64 ucrt64; do
+    install -d -m755 ${m}
+    for d in bin etc include lib share; do
+      install -d -m755 ${m}/${d}
+    done
+  done
+}
