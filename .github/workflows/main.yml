@@ -1,0 +1,66 @@
+name: main
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    if: ${{ github.event_name != 'push' || github.ref != 'refs/heads/master'}}
+    runs-on: windows-2022
+
+    env:
+      MSYS: enable_pcon
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          path: temp
+          fetch-depth: 0
+
+      # to match the autobuild environment
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MSYS
+          install: VCS base-devel pactoys
+          update: true
+
+      - name: Add staging repo
+        shell: msys2 {0}
+        run: |
+          sed -i '1s|^|[staging]\nServer = https://repo.msys2.org/staging/\nSigLevel = Never\n|' /etc/pacman.conf
+
+      - name: Update using staging
+        run: |
+          msys2 -c 'pacman --noconfirm -Suuy'
+          msys2 -c 'pacman --noconfirm -Suu'
+
+      - name: Move Checkout
+        run: |
+          Copy-Item -Path ".\temp" -Destination "C:\_" -Recurse
+
+      - name: CI-Build
+        shell: msys2 {0}
+        run: |
+          cd /C/_
+          ./.ci/ci-build.sh
+
+      - name: "Upload binaries"
+        uses: actions/upload-artifact@v3
+        with:
+          name: msys2-packages
+          path: C:/_/artifacts/*.pkg.tar.*
+
+      - name: "Upload sources"
+        uses: actions/upload-artifact@v3
+        with:
+          name: sources
+          path: C:/_/artifacts/*.src.tar.*
