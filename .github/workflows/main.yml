@@ -5,12 +5,11 @@ concurrency:
   cancel-in-progress: true
 
 on:
-  push:
   pull_request:
 
 jobs:
   build:
-    if: ${{ github.event_name != 'push' || github.ref != 'refs/heads/master'}}
+    if: ${{ github.ref != 'refs/heads/master' }}
     runs-on: windows-2022
 
     env:
@@ -22,26 +21,11 @@ jobs:
           path: temp
           fetch-depth: 0
 
-      # to match the autobuild environment
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-
       - uses: msys2/setup-msys2@v2
         with:
           msystem: MSYS
           install: VCS base-devel pactoys
           update: true
-
-      - name: Add staging repo
-        shell: msys2 {0}
-        run: |
-          sed -i '1s|^|[staging]\nServer = https://repo.msys2.org/staging/\nSigLevel = Never\n|' /etc/pacman.conf
-
-      - name: Update using staging
-        run: |
-          msys2 -c 'pacman --noconfirm -Suuy'
-          msys2 -c 'pacman --noconfirm -Suu'
 
       - name: Move Checkout
         run: |
@@ -53,14 +37,37 @@ jobs:
           cd /C/_
           ./.ci/ci-build.sh
 
-      - name: "Upload binaries"
-        uses: actions/upload-artifact@v3
-        with:
-          name: msys2-packages
-          path: C:/_/artifacts/*.pkg.tar.*
+      - name: CI-Sign
+        shell: msys2 {0}
+        env:
+          GPG_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+        run: |
+          cd /C/_
+          ./.ci/ci-sign.sh
 
-      - name: "Upload sources"
-        uses: actions/upload-artifact@v3
-        with:
-          name: sources
-          path: C:/_/artifacts/*.src.tar.*
+      - name: CI-Rsync
+        shell: msys2 {0}
+        env:
+          SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_SERVER_KEY: ${{ secrets.SSH_SERVER_KEY }}
+        run: |
+          cd /C/_
+          ./.ci/ci-rsync.sh
+      
+      - name: CI-commit
+        shell: msys2 {0}
+        run: |
+          cd /C/_
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add .
+          git commit -m "build: bump pkgrel"
+          git push
+
+      - name: Cleanup
+        if: always()
+        shell: msys2 {0}
+        run: |
+          rm -rf ~

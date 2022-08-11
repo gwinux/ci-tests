@@ -1,0 +1,138 @@
+# Maintainer: Alexey Pavlov <alexpux@gmail.com>
+# Contributor: Renato Silva <br.renatosilva@gmail.com>
+# Contributor: Karlson2k (Evgeny Grin) <k2k@narod.ru>
+# Contributor: Alethea Rose <alethea@alethearose.com>
+
+pkgname='posix-filesystem'
+pkgver=2022.01
+pkgrel=4
+pkgdesc='Base filesystem'
+arch=('i686' 'x86_64')
+license=('BSD')
+provides=('filesystem')
+url='https://github.com/gwinux'
+backup=('etc/fstab' 'etc/shells' 'etc/profile'
+        etc/bash.bash{rc,_logout} etc/skel/.bash{rc,_profile,_logout}
+        etc/nsswitch.conf)
+source=('bash.bash_logout'
+        'bash.bashrc'
+        'dep-search'
+        'dot.bash_logout'
+        'dot.bash_profile'
+        'dot.bashrc'
+        'dot.inputrc'
+        'dot.profile'
+        'fstab'
+        'msys2.ico'
+        'nsswitch.conf'
+        'profile'
+        'profile.lang.sh'
+        'profile.tzset.sh'
+        'profile.000-msys2.sh'
+        'shells'
+        '01-devices.post'
+        '03-mtab.post'
+        '05-home-dir.post'
+        '06-windows-files.post'
+        '07-pacman-key.post'
+        '08-xml-catalog.post'
+        'cygwin.ldif'
+        'main-config.site'
+        'redirect-config.site'
+        'os-release')
+sha256sums=('742a7d66b7a5ebd2b8461728c5b44a46b2305fd2116208eecae5f45828938ea0'
+            '36d4affa25606c87e70c42a5fe2294aa7898fb54f93a27910fb55224f4d6588a'
+            '69e62980bd853bc67194c3cd0b3547b35ab5b2fc7237d70f15617196685bf287'
+            '4330edf340394d0dae50afb04ac2a621f106fe67fb634ec81c4bfb98be2a1eb5'
+            '287590101dbb77ed01d491bb59beb6d4032cd3ceeec0561b25a901f6c28b2d09'
+            'b1d018317b642000554c160786de4f8d5225a9e511c5a84c35337c5057437cb5'
+            'f327a822ef33e5d39e94af0419a9083a3e2cbb0d8bff4070453403f68bb6351b'
+            '0e3f00cb2cc7778a1fb5440fc979cfeeafeca72c3059dd474f38ed6b99b46070'
+            '387ca1e86c1a18a143eb077ca194ad44c0a2faf98795a0d437f2d210d5a6df18'
+            '793b9450a1a59a6c294e51fd0c2a47090d68c68ff2f33a25a11b45f6408c3917'
+            '91f1f918cf13deab0124082086e990786113b0e710dbda4678d8fc14905ad94d'
+            '35d79ed374d0b2b8ed08d3a5842bf68fd376d78e6247f1a6f5004441b1f550d7'
+            '6c0ca979c7b146b3750103b1296a399764f4e1b222ee091d3aa072b6da16c1a5'
+            'cbec90c9403826bf6d8dd1fed16240b9d8695ec15df5dcdab7e485bb46c016ab'
+            'f78eccf2c2c87e5f159a836f63537683943f0e7726b448fb21cca72d13b38e80'
+            'f63241cc56aa7b7ec6962d19991d211b4e1641b78ba5226835118ab493830a8b'
+            '42191d0e5a56c1da2adb6f665fceb82555de276f9a50af47ff9fa7b59b4d3848'
+            'd7b7eb4cd9e1f9bc227b009cdcacf700f5523ccc109fbd3c1c0331726d314c9e'
+            '9c126262051a047450ed97397ee89a7148098c03ae00a1cd67c3f3425d8e4b12'
+            'fedaf4d9ae282f6c1698d04d280dd48c8d3247321a5cb5e309e61e2c655102c6'
+            '92c1d6478aab8178a3894858990722e1eecc001a681b4fe524023ac98ad84259'
+            'ad8533809ea2b1bce0a41b3a0a24dbc7a9f58b992ceb40cc9f862b1978032790'
+            'caf25e3390331c6a22cc91f1c1bc551a9f87c59171dd3ef7b3b6016859a10fb5'
+            '723babbefdef5479842d139e13396a2eb4f88c74b2b9d793ce7fd0f6396dcf65'
+            '26bf8d1acade9431d60c035a7ddfa9cb0775d5b9a457c5aca56f51c5f2f93f98'
+            '837cb107abdec386798a2a07ed643dda6f43b30200f66ccf3d1623e1927f4220')
+
+build() {
+  cd ${srcdir}
+}
+
+package() {
+  cd ${pkgdir}
+
+  # setup root filesystem
+  #
+  for d in dev etc home usr var opt; do
+    install -d -m755 ${d}
+  done
+
+  mkdir -p tmp
+
+  # setup /etc
+  #
+  install -d etc/{fstab.d,skel,profile.d,post-install}
+  for f in bash.bashrc bash.bash_logout fstab shells profile nsswitch.conf os-release; do
+    install -m644 "${srcdir}/${f}" etc/
+  done
+
+  for f in "${srcdir}"/*.post; do
+    install -m644 "${f}" etc/post-install/
+  done
+
+  # user configuration file skeletons
+  #
+  install -m644 "${srcdir}/dot.bashrc" etc/skel/.bashrc
+  install -m644 "${srcdir}/dot.inputrc" etc/skel/.inputrc
+  install -m644 "${srcdir}/dot.bash_profile" etc/skel/.bash_profile
+  install -m644 "${srcdir}/dot.bash_logout" etc/skel/.bash_logout
+  install -m644 "${srcdir}/dot.profile" etc/skel/.profile
+
+  install -m644 "${srcdir}/profile.tzset.sh" etc/profile.d/tzset.sh
+  install -m644 "${srcdir}/profile.lang.sh" etc/profile.d/lang.sh
+  install -m644 "${srcdir}/profile.000-msys2.sh" etc/profile.d/000-msys2.sh
+
+  install -Dm644 "${srcdir}/msys2.ico" usr/share/icons/ico/msys2.ico
+
+  # setup /var
+  #
+  for d in cache/man local opt log/old lib/misc empty; do
+    install -d -m755 var/${d}
+  done
+  mkdir -p var/tmp
+
+  # setup /usr
+  #
+  for d in bin include lib share/misc src; do
+    install -d -m755 usr/${d}
+  done
+  for d in $(seq 8); do
+    install -d -m755 "usr/share/man/man${d}"
+  done
+
+  install -m755 "${srcdir}/dep-search" usr/bin
+  install -Dm 644 "${srcdir}/cygwin.ldif" usr/share/Msys/cygwin.ldif
+
+  # setup 'configure' helpers
+  #
+  install -m644 "${srcdir}/main-config.site" etc/config.site
+  install -D -m644 "${srcdir}/redirect-config.site" usr/local/etc/config.site
+
+
+  for d in bin include lib share; do
+    install -d -m755 ${d}
+  done
+}

@@ -1,0 +1,6 @@
+NAME=GWINUX
+ID=gwinux
+PRETTY_NAME="Gwinux"
+ID_LIKE="msys2 cygwin arch"
+HOME_URL="https://github.com/gwinux"
+BUG_REPORT_URL="https://github.com/gwinux/POSIX-packages/issues"
