@@ -11,9 +11,9 @@ DIR="$( cd "$( dirname "$0" )" && pwd )"
 # Configure
 source "$DIR/ci-library.sh"
 mkdir msys2-artifacts posix-artifacts
-git_config user.email 'ci@msys2.org'
-git_config user.name  'MSYS2 Continuous Integration'
-git remote add upstream 'https://github.com/MSYS2/MSYS2-packages'
+git_config user.email 'ci@noreply.com'
+git_config user.name  'Gwinux Continuous Integration'
+git remote add upstream 'https://github.com/gwinux/POSIX-packages'
 git fetch --quiet upstream
 # reduce time required to install packages by disabling pacman's disk space checking
 sed -i 's/^CheckSpace/#CheckSpace/g' /etc/pacman.conf
@@ -37,7 +37,7 @@ pacman -Sy
 
 message 'Building packages'
 for package in "${packages[@]}"; do
-    echo "::group::[build] ${package}"
+    start_group BUILD "${package}"
     execute 'Fetch keys' "$DIR/fetch-validpgpkeys.sh"
     # Ensure the toolchain is installed before building the package
     execute 'Installing the toolchain' pacman -S --needed --noconfirm --noprogressbar base-devel
@@ -59,7 +59,7 @@ for package in "${packages[@]}"; do
         continue
     fi 
 
-    echo "::endgroup::"
+    end_group
 
     if compgen -G "${package}/*.pkg.tar.*" > /dev/null; then continue; fi
 
@@ -67,32 +67,32 @@ for package in "${packages[@]}"; do
         cd "$package"
         for pkg in *.pkg.tar.*; do
             pkgname="$(echo "$pkg" | rev | cut -d- -f4- | rev)"
-            echo "::group::[install] ${pkgname}"
+            start_group INSTALL "${pkgname}"
             grep -qFx "${package}" "$DIR/ci-dont-install-list.txt" || pacman --noprogressbar --upgrade --noconfirm $pkg
-            echo "::endgroup::"
+            end_group
 
-            echo "::group::[diff] ${pkgname}"
+            start_group DIFF "${pkgname}"
             message "Package info diff for ${pkgname}"
             diff -Nur <(pacman -Si "${pkgname}") <(pacman -Qip "${pkg}") || true
 
             message "File listing diff for ${pkgname}"
             diff -Nur <(pacman -Fl "$pkgname" | sed -e 's|^[^ ]* |/|' | sort) <(pacman -Ql "$pkgname" | sed -e 's|^[^/]*||' | sort) || true
-            echo "::endgroup::"
+            end_group
 
-            echo "::group::[uninstall] ${pkgname}"
+            start_group UNINSTALL "${pkgname}"
             message "Uninstalling $pkgname"
             repo-add $PWD/../msys2-artifacts/ci.db.tar.gz $PWD/$pkg
             pacman -Sy
             pacman -R --recursive --unneeded --noconfirm --noprogressbar "$pkgname"
-            echo "::endgroup::"
+            end_group
         done
         cd - > /dev/null
     else
-        echo "::group::[install] ${package}"
+        start_group INSTALL "${package}"
         grep -qFx "${package}" "$DIR/ci-dont-install-list.txt" || execute 'Installing' install_packages
-        echo "::endgroup::"
+        end_group
 
-        echo "::group::[diff] ${package}"
+        start_group DIFF "${package}"
         cd "$package"
         for pkg in *.pkg.tar.*; do
             pkgname="$(echo "$pkg" | rev | cut -d- -f4- | rev)"
@@ -103,14 +103,14 @@ for package in "${packages[@]}"; do
             diff -Nur <(pacman -Fl "$pkgname" | sed -e 's|^[^ ]* |/|' | sort) <(pacman -Ql "$pkgname" | sed -e 's|^[^/]*||' | sort) || true
         done
         cd - > /dev/null
-        echo "::endgroup::"
+        end_group
 
-        echo "::group::[dll check] ${package}"
+        start_group "DLL CHECK" "${package}"
         execute 'Checking dll depencencies' list_dll_deps ./pkg
         execute 'Checking dll bases' list_dll_bases ./pkg
-        echo "::endgroup::"
+        end_group
 
-        echo "::group::[uninstall] ${package}"
+        start_group UNINSTALL "${package}"
         repo-add $PWD/msys2-artifacts/ci.db.tar.gz "${package}"/*.pkg.tar.*
         pacman -Sy
         message "Uninstalling $package"
@@ -122,7 +122,7 @@ for package in "${packages[@]}"; do
         grep -qFx "${package}" "$DIR/ci-dont-install-list.txt" || pacman -R --recursive --unneeded --noconfirm --noprogressbar "${installed_packages[@]}"
         unset installed_packages
         cd - > /dev/null
-        echo "::endgroup::"
+        end_group
     fi
 
     mv "${package}"/*.pkg.tar.* msys2-artifacts

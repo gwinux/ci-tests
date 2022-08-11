@@ -22,11 +22,6 @@ jobs:
           path: temp
           fetch-depth: 0
 
-      # to match the autobuild environment
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-
       - uses: msys2/setup-msys2@v2
         with:
           msystem: MSYS
@@ -57,28 +52,11 @@ jobs:
           SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           SSH_USER: ${{ secrets.SSH_USER }}
           SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_SERVER_KEY: ${{ secrets.SSH_SERVER_KEY }}
         run: |
           cd /C/_
           ./.ci/ci-rsync.sh
-
-      - name: "Upload binaries"
-        uses: actions/upload-artifact@v3
-        with:
-          name: msys2-packages
-          path: C:/_/msys2-artifacts/*.pkg.tar.*
-
-      - name: "Upload sources"
-        uses: actions/upload-artifact@v3
-        with:
-          name: sources
-          path: C:/_/msys2-artifacts/*.src.tar.*
-
-      - name: "Upload posix binaries"
-        uses: actions/upload-artifact@v3
-        with:
-          name: posix-packages
-          path: C:/_/posix-artifacts/*.pkg.tar.*
-
+          
       - name: Cleanup
         if: always()
         shell: msys2 {0}
