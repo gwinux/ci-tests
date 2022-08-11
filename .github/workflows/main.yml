@@ -78,3 +78,9 @@ jobs:
         with:
           name: posix-packages
           path: C:/_/posix-artifacts/*.pkg.tar.*
+
+      - name: Cleanup
+        if: always()
+        shell: msys2 {0}
+        run: |
+          rm -rf ~
