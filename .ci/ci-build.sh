@@ -11,7 +11,7 @@ DIR="$( cd "$( dirname "$0" )" && pwd )"
 # Configure
 source "$DIR/ci-library.sh"
 mkdir msys2-artifacts posix-artifacts
-git_config user.email 'ci@noreply.com'
+git_config user.email 'ci@users.noreply.github.com'
 git_config user.name  'Gwinux Continuous Integration'
 git remote add upstream 'https://github.com/gwinux/POSIX-packages'
 git fetch --quiet upstream
@@ -41,6 +41,8 @@ for package in "${packages[@]}"; do
     execute 'Fetch keys' "$DIR/fetch-validpgpkeys.sh"
     # Ensure the toolchain is installed before building the package
     execute 'Installing the toolchain' pacman -S --needed --noconfirm --noprogressbar base-devel
+    message 'Bump pkgrel version' 
+    awk -i inplace -F '=' '/^pkgrel=/ {print $1"="++$2; next;};{print}' "${package}/PKGBUILD"
     execute 'Building binary' makepkg --noconfirm --noprogressbar --nocheck --syncdeps --rmdeps --cleanbuild
     execute 'Building source' makepkg --noconfirm --noprogressbar --allsource
     message "Skipping posix package: ${package}"

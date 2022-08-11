@@ -5,7 +5,7 @@
 
 pkgname='posix-filesystem'
 pkgver=2022.01
-pkgrel=1
+pkgrel=4
 pkgdesc='Base filesystem'
 arch=('i686' 'x86_64')
 license=('BSD')

@@ -1,5 +1,10 @@
 #!/usr/bin/bash
 
+set -eo pipefail
+
+DIR="$( cd "$( dirname "$0" )" && pwd )"
+source "$DIR/ci-library.sh"
+
 pacman -S --needed --noconfirm --noprogressbar openssh rsync
 source <(ssh-agent)
 mkdir -p ~/.ssh
